@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import RealmCard from '@/components/realm-card';
+import RealmExperience from '@/components/realm-experience';
 import ReflectionJournal from '@/components/reflection-journal';
 import Particles from '@/components/particles';
+import Footer from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MentalRealm, UserState } from '@/types';
 import { authService } from '@/lib/supabase';
 import { motion } from 'framer-motion';
@@ -13,6 +16,8 @@ import { motion } from 'framer-motion';
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const [user, setUser] = useState<UserState>({ isAuthenticated: false });
+  const [selectedRealm, setSelectedRealm] = useState<MentalRealm | null>(null);
+  const [showHeadStartDialog, setShowHeadStartDialog] = useState(false);
 
   useEffect(() => {
     const currentUser = authService.getUser();
@@ -27,16 +32,27 @@ export default function Dashboard() {
   }, [setLocation]);
 
   // Fetch user progress
-  const { data: userProgress, isLoading } = useQuery({
+  const { data: userProgress, isLoading, refetch } = useQuery({
     queryKey: [`/api/progress/${user.id}`],
     enabled: !!user.id,
   });
 
   // Calculate overall progress
   const calculateOverallProgress = () => {
-    if (!userProgress || userProgress.length === 0) return 0;
+    if (!userProgress || !Array.isArray(userProgress) || userProgress.length === 0) return 0;
     const totalProgress = userProgress.reduce((sum: number, realm: any) => sum + realm.progress, 0);
     return Math.round(totalProgress / userProgress.length);
+  };
+
+  // Helper function to get realm data safely
+  const getRealmData = (realmId: string) => {
+    if (!Array.isArray(userProgress)) return { progress: 0, isUnlocked: realmId === 'fear', isCompleted: false };
+    const realmData = userProgress.find((p: any) => p.realmId === realmId);
+    return {
+      progress: realmData?.progress || 0,
+      isUnlocked: realmData?.isUnlocked || (realmId === 'fear'),
+      isCompleted: realmData?.isCompleted || false
+    };
   };
 
   // Mental realms configuration
@@ -48,8 +64,7 @@ export default function Dashboard() {
       icon: 'fa-ghost',
       color: 'text-pink-400',
       bgImage: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400',
-      progress: userProgress?.find((p: any) => p.realmId === 'fear')?.progress || 0,
-      isUnlocked: userProgress?.find((p: any) => p.realmId === 'fear')?.isUnlocked || true,
+      ...getRealmData('fear'),
     },
     {
       id: 'doubt',
@@ -58,8 +73,7 @@ export default function Dashboard() {
       icon: 'fa-question',
       color: 'text-cyan-400',
       bgImage: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400',
-      progress: userProgress?.find((p: any) => p.realmId === 'doubt')?.progress || 0,
-      isUnlocked: userProgress?.find((p: any) => p.realmId === 'doubt')?.isUnlocked || false,
+      ...getRealmData('doubt'),
     },
     {
       id: 'anxiety',
@@ -68,8 +82,7 @@ export default function Dashboard() {
       icon: 'fa-wind',
       color: 'text-yellow-400',
       bgImage: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400',
-      progress: userProgress?.find((p: any) => p.realmId === 'anxiety')?.progress || 0,
-      isUnlocked: userProgress?.find((p: any) => p.realmId === 'anxiety')?.isUnlocked || false,
+      ...getRealmData('anxiety'),
     },
     {
       id: 'self-worth',
@@ -78,8 +91,7 @@ export default function Dashboard() {
       icon: 'fa-gem',
       color: 'text-purple-400',
       bgImage: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400',
-      progress: userProgress?.find((p: any) => p.realmId === 'self-worth')?.progress || 0,
-      isUnlocked: userProgress?.find((p: any) => p.realmId === 'self-worth')?.isUnlocked || false,
+      ...getRealmData('self-worth'),
     },
     {
       id: 'forgiveness',
@@ -88,8 +100,7 @@ export default function Dashboard() {
       icon: 'fa-dove',
       color: 'text-green-400',
       bgImage: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400',
-      progress: userProgress?.find((p: any) => p.realmId === 'forgiveness')?.progress || 0,
-      isUnlocked: userProgress?.find((p: any) => p.realmId === 'forgiveness')?.isUnlocked || false,
+      ...getRealmData('forgiveness'),
     },
     {
       id: 'wisdom',
@@ -98,16 +109,27 @@ export default function Dashboard() {
       icon: 'fa-eye',
       color: 'text-indigo-400',
       bgImage: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400',
-      progress: userProgress?.find((p: any) => p.realmId === 'wisdom')?.progress || 0,
-      isUnlocked: userProgress?.find((p: any) => p.realmId === 'wisdom')?.isUnlocked || false,
+      ...getRealmData('wisdom'),
     },
   ];
 
   const handleEnterRealm = (realm: MentalRealm) => {
-    // For now, just show a placeholder message
-    // In a full implementation, this would navigate to the 3D realm experience
-    console.log(`Entering ${realm.name} realm...`);
-    // You could navigate to a specific realm page or open a modal
+    setSelectedRealm(realm);
+  };
+
+  const handleRealmComplete = () => {
+    setSelectedRealm(null);
+    refetch();
+  };
+
+  const handleHeadStart = (realm: MentalRealm) => {
+    setSelectedRealm(realm);
+    setShowHeadStartDialog(false);
+  };
+
+  // Find the current realm user is working on
+  const getCurrentRealm = () => {
+    return mentalRealms.find(realm => realm.isUnlocked && !realm.isCompleted && realm.progress < 100) || mentalRealms[0];
   };
 
   const overallProgress = calculateOverallProgress();
@@ -208,46 +230,109 @@ export default function Dashboard() {
           <ReflectionJournal />
         </motion.div>
 
-        {/* Quick Actions */}
+        {/* Enhanced Continue Your Journey */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="mt-16 text-center"
+          className="mt-16"
         >
-          <div className="glass-morphism p-8 rounded-2xl max-w-2xl mx-auto">
-            <h3 className="text-2xl font-bold gradient-text mb-4">
-              Continue Your Journey
-            </h3>
-            <p className="text-gray-300 mb-6">
-              Ready to explore deeper into your consciousness? 
-              Choose a realm that calls to you today.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Continue Journey */}
+            <div className="glass-morphism p-8 rounded-2xl">
+              <h3 className="text-2xl font-bold gradient-text mb-4">
+                Continue Your Journey
+              </h3>
+              <p className="text-gray-300 mb-6">
+                Pick up where you left off and continue growing your inner flame.
+              </p>
+              <div className="space-y-4">
+                <Button 
+                  className="w-full glow-button px-6 py-3 rounded-full"
+                  onClick={() => {
+                    const currentRealm = getCurrentRealm();
+                    if (currentRealm) handleEnterRealm(currentRealm);
+                  }}
+                >
+                  <i className="fas fa-play mr-2" />
+                  Continue {getCurrentRealm()?.name} Realm
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="w-full glow-button px-6 py-3 rounded-full"
+                  onClick={() => {
+                    document.getElementById('realms-section')?.scrollIntoView({ 
+                      behavior: 'smooth' 
+                    });
+                  }}
+                >
+                  <i className="fas fa-compass mr-2" />
+                  Explore All Realms
+                </Button>
+              </div>
+            </div>
+
+            {/* Head Start Option */}
+            <div className="glass-morphism p-8 rounded-2xl">
+              <h3 className="text-2xl font-bold text-cyan-400 mb-4">
+                Head Start
+              </h3>
+              <p className="text-gray-300 mb-6">
+                Want to jump to a specific realm? Skip the procedural progression and dive into what calls to you most.
+              </p>
               <Button 
-                className="glow-button px-6 py-3 rounded-full"
-                onClick={() => {
-                  const nextRealm = mentalRealms.find(r => r.isUnlocked && r.progress < 100);
-                  if (nextRealm) handleEnterRealm(nextRealm);
-                }}
+                className="w-full glow-button px-6 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
+                onClick={() => setShowHeadStartDialog(true)}
               >
-                Continue Where You Left Off
-              </Button>
-              <Button 
-                variant="outline"
-                className="glow-button px-6 py-3 rounded-full"
-                onClick={() => {
-                  document.getElementById('realm-grid')?.scrollIntoView({ 
-                    behavior: 'smooth' 
-                  });
-                }}
-              >
-                Explore All Realms
+                <i className="fas fa-rocket mr-2" />
+                Choose Any Realm
               </Button>
             </div>
           </div>
         </motion.div>
+
+        {/* Head Start Dialog */}
+        <Dialog open={showHeadStartDialog} onOpenChange={setShowHeadStartDialog}>
+          <DialogContent className="glass-morphism border-2 border-cyan-500/30 max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold gradient-text">
+                Choose Your Realm
+              </DialogTitle>
+              <p className="text-gray-400">
+                Select any realm to begin your journey there. No prerequisites required.
+              </p>
+            </DialogHeader>
+            <div className="grid md:grid-cols-2 gap-4 mt-6">
+              {mentalRealms.map((realm) => (
+                <Button
+                  key={realm.id}
+                  variant="outline"
+                  className="p-4 h-auto flex flex-col items-start space-y-2 text-left hover:border-cyan-400 transition-colors"
+                  onClick={() => handleHeadStart(realm)}
+                >
+                  <div className="flex items-center space-x-3 w-full">
+                    <i className={`fas ${realm.icon} ${realm.color} text-xl`} />
+                    <span className="font-semibold">{realm.name}</span>
+                  </div>
+                  <p className="text-sm text-gray-400">{realm.description}</p>
+                </Button>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Realm Experience Modal */}
+        {selectedRealm && (
+          <RealmExperience
+            realm={selectedRealm}
+            onComplete={handleRealmComplete}
+            onClose={() => setSelectedRealm(null)}
+          />
+        )}
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

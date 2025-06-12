@@ -7,6 +7,7 @@ export interface MentalRealm {
   bgImage: string;
   progress: number;
   isUnlocked: boolean;
+  isCompleted: boolean;
   completedAt?: Date;
 }
 
