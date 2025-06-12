@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { audioManager } from '@/lib/audio';
 import { authService } from '@/lib/supabase';
 import { UserState } from '@/types';
+import Logo from '@/components/logo';
 
 export default function Navbar() {
   const [location] = useLocation();
@@ -37,7 +38,7 @@ export default function Navbar() {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-cyan-400 animate-pulse-soft group-hover:scale-110 transition-transform" />
+            <Logo size="sm" className="group-hover:scale-110 transition-transform" />
             <h1 className="text-xl font-bold gradient-text">Inner Flame</h1>
           </Link>
           

@@ -170,7 +170,6 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Add interface method for updating user
 export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
