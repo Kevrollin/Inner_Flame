@@ -1,0 +1,36 @@
+Build me a stunning, interactive 3D web app called "Inner Flame". It’s a self-discovery adventure game themed around the user traveling inside their own mind. The overall style should be glowing, smooth, slightly surreal, and calming — think Journey meets Celeste, but in modern 3D web style. The mood should feel empowering, emotional, and artistic.
+
+Pages & Flow:
+Welcome Page
+A fullscreen carousel slider introducing the app’s concept: emotional growth, self-discovery, overcoming inner obstacles (fear, doubt, etc).
+Each slide should have a glowing image background, motivational text overlay, and smooth transitions (slide or fade).
+Call-to-action buttons: “Start Your Journey”, “Sign In”, and “Learn More”.
+Background music toggle, subtle particle animation, or ambient effects to keep it engaging.
+
+Authentication Pages
+Use Supabase for sign up, login, and forgot password.
+Auth UI should be themed with the same glowing, minimal aesthetic.
+Add a quote or mantra per auth page — like “Every flame starts small.” or “Doubt is just a shadow.”
+Game Dashboard / Core Experience
+Once logged in, the user lands on a dashboard/map area showing their current level (“Mental Realm”) — like Fear, Doubt, Anxiety, etc.
+Each realm unlocks one by one as progress is made.
+Include a progress bar or glowing “Clarity Meter”.
+Add interactive cards or portals that animate on hover/click to enter a level.
+Space for in-game journal entries, reflections, or saved milestones.
+
+Design Style
+Visuals should be neon-glow inspired, with dark backgrounds and animated glowing accents.
+Fonts: modern, soft, elegant — readable but unique.
+Use interactive hover effects, light particle effects, glowing buttons, and smooth transitions.
+Design must not feel like a corporate dashboard — think vibey, magical, and emotional.
+
+Functional Requirements
+Fully responsive for desktop and mobile.
+Supabase integration for user accounts and saved game progress.
+Easy to expand: allow additional “mental realms” or levels to be added.
+Smooth routing between pages.
+
+Vibe Notes
+The app should feel like a personal journey, not a typical game UI.
+Add subtle ambient sounds, glowing transitions, and emotional animations.
+Use colors that feel safe, warm, and dreamy — soft purples, blues, pink glows.
