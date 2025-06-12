@@ -1,32 +1,42 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertReflectionSchema } from "@shared/schema";
+import { insertUserSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post("/api/auth/register", async (req, res) => {
+    const { username, email, password } = req.body;
+    console.log("Register received:", req.body); // <-- Add this line
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "Invalid user data" });
+    }
+
     try {
-      const userData = insertUserSchema.parse(req.body);
-      
-      // Check if user already exists
-      const existingUser = await storage.getUserByEmail(userData.email);
-      if (existingUser) {
-        return res.status(400).json({ message: "User already exists" });
-      }
-      
+      // Validate and parse user data
+      const userData = insertUserSchema.parse({ username, email, password });
+
       // Hash password
       const hashedPassword = await bcrypt.hash(userData.password, 10);
-      
+
+      // Create user in DB
       const user = await storage.createUser({
         ...userData,
         password: hashedPassword,
       });
-      
-      res.json({ user: { id: user.id, email: user.email, username: user.username } });
-    } catch (error) {
-      res.status(400).json({ message: "Invalid user data" });
+
+      // Return user info (omit password)
+      res.status(201).json({
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+        },
+      });
+    } catch (error: any) {
+      console.error("Registration error:", error); // <--- Add this
+      res.status(400).json({ message: error.message || "Registration failed" });
     }
   });
 
@@ -97,4 +107,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   return httpServer;
+}
+
+export interface User {
+  id: number;
+  email: string;
+  username: string;
+  password: string;
+  // other properties...
 }
