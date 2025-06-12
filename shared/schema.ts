@@ -7,6 +7,8 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   username: text("username").notNull().unique(),
+  currentRealm: text("current_realm").default("fear"),
+  overallProgress: integer("overall_progress").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -16,6 +18,7 @@ export const userProgress = pgTable("user_progress", {
   realmId: text("realm_id").notNull(),
   progress: integer("progress").default(0).notNull(),
   isUnlocked: boolean("is_unlocked").default(false).notNull(),
+  isCompleted: boolean("is_completed").default(false).notNull(),
   completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

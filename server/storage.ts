@@ -21,35 +21,12 @@ export interface IStorage {
   createReflection(reflection: InsertReflection): Promise<Reflection>;
 }
 
-// Handle different database connection formats
-let sql: any;
-let db: any;
+// Database connection
+const sql = neon(process.env.DATABASE_URL!);
+const db = drizzle(sql);
 
-try {
-  const databaseUrl = process.env.DATABASE_URL!;
-  console.log('Connecting to database...');
-  
-  // Check if it's a valid PostgreSQL URL
-  if (databaseUrl.startsWith('postgresql://') || databaseUrl.startsWith('postgres://')) {
-    sql = neon(databaseUrl);
-    db = drizzle(sql);
-    console.log('Database connection established');
-  } else {
-    throw new Error('Invalid database URL format');
-  }
-} catch (error) {
-  console.error('Database connection failed:', error);
-  console.log('Falling back to in-memory storage for development');
-  // We'll implement fallback storage below
-}
-
-// Initialize database tables if connection exists
+// Initialize database tables
 async function initializeDatabase() {
-  if (!sql || !db) {
-    console.log('Skipping database initialization - no connection');
-    return;
-  }
-
   try {
     await sql`
       CREATE TABLE IF NOT EXISTS users (
@@ -57,6 +34,8 @@ async function initializeDatabase() {
         email TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
         username TEXT NOT NULL UNIQUE,
+        current_realm TEXT DEFAULT 'fear',
+        overall_progress INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT NOW() NOT NULL
       );
     `;
@@ -68,9 +47,11 @@ async function initializeDatabase() {
         realm_id TEXT NOT NULL,
         progress INTEGER DEFAULT 0 NOT NULL,
         is_unlocked BOOLEAN DEFAULT FALSE NOT NULL,
+        is_completed BOOLEAN DEFAULT FALSE NOT NULL,
         completed_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT NOW() NOT NULL,
-        updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+        updated_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        UNIQUE(user_id, realm_id)
       );
     `;
 
@@ -96,25 +77,21 @@ initializeDatabase();
 
 export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    if (!db) throw new Error('Database not available');
     const result = await db.select().from(users).where(eq(users.id, id));
     return result[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    if (!db) throw new Error('Database not available');
     const result = await db.select().from(users).where(eq(users.email, email));
     return result[0];
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    if (!db) throw new Error('Database not available');
     const result = await db.select().from(users).where(eq(users.username, username));
     return result[0];
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    if (!db) throw new Error('Database not available');
     const result = await db.insert(users).values(insertUser).returning();
     const user = result[0];
     
@@ -122,12 +99,18 @@ export class DatabaseStorage implements IStorage {
     const progressValues = realms.map(realm => ({
       userId: user.id,
       realmId: realm,
-      progress: realm === 'fear' ? 85 : 0,
-      isUnlocked: realm === 'fear' || realm === 'doubt',
+      progress: 0,
+      isUnlocked: realm === 'fear',
+      isCompleted: false,
     }));
     
     await db.insert(userProgress).values(progressValues);
     return user;
+  }
+
+  async updateUser(id: number, updates: Partial<InsertUser>): Promise<User> {
+    const result = await db.update(users).set(updates).where(eq(users.id, id)).returning();
+    return result[0];
   }
 
   async getUserProgress(userId: number): Promise<UserProgress[]> {
@@ -187,116 +170,24 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export class MemoryStorage implements IStorage {
-  private users: Map<number, User> = new Map();
-  private userProgress: Map<string, UserProgress> = new Map();
-  private reflections: Map<number, Reflection> = new Map();
-  private currentUserId: number = 1;
-  private currentProgressId: number = 1;
-  private currentReflectionId: number = 1;
-
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === email);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { 
-      ...insertUser, 
-      id,
-      createdAt: new Date(),
-    };
-    this.users.set(id, user);
-    
-    const realms = ['fear', 'doubt', 'anxiety', 'self-worth', 'forgiveness', 'wisdom'];
-    for (const realm of realms) {
-      const progressId = this.currentProgressId++;
-      const progress: UserProgress = {
-        id: progressId,
-        userId: id,
-        realmId: realm,
-        progress: realm === 'fear' ? 85 : 0,
-        isUnlocked: realm === 'fear' || realm === 'doubt',
-        completedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      this.userProgress.set(`${id}-${realm}`, progress);
-    }
-    
-    return user;
-  }
-
-  async getUserProgress(userId: number): Promise<UserProgress[]> {
-    return Array.from(this.userProgress.values()).filter(progress => progress.userId === userId);
-  }
-
-  async getRealmProgress(userId: number, realmId: string): Promise<UserProgress | undefined> {
-    return this.userProgress.get(`${userId}-${realmId}`);
-  }
-
-  async updateUserProgress(userId: number, realmId: string, progressUpdate: Partial<InsertUserProgress>): Promise<UserProgress> {
-    const key = `${userId}-${realmId}`;
-    const existing = this.userProgress.get(key);
-    
-    if (!existing) {
-      const id = this.currentProgressId++;
-      const newProgress: UserProgress = {
-        id,
-        userId,
-        realmId,
-        progress: 0,
-        isUnlocked: false,
-        completedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        ...progressUpdate,
-      };
-      this.userProgress.set(key, newProgress);
-      return newProgress;
-    }
-    
-    const updated: UserProgress = {
-      ...existing,
-      ...progressUpdate,
-      updatedAt: new Date(),
-    };
-    
-    this.userProgress.set(key, updated);
-    return updated;
-  }
-
-  async getUserReflections(userId: number): Promise<Reflection[]> {
-    return Array.from(this.reflections.values())
-      .filter(reflection => reflection.userId === userId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  }
-
-  async getRealmReflections(userId: number, realmId: string): Promise<Reflection[]> {
-    return Array.from(this.reflections.values())
-      .filter(reflection => reflection.userId === userId && reflection.realmId === realmId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  }
-
-  async createReflection(insertReflection: InsertReflection): Promise<Reflection> {
-    const id = this.currentReflectionId++;
-    const reflection: Reflection = {
-      ...insertReflection,
-      id,
-      metadata: insertReflection.metadata || null,
-      createdAt: new Date(),
-    };
-    this.reflections.set(id, reflection);
-    return reflection;
-  }
+// Add interface method for updating user
+export interface IStorage {
+  // User methods
+  getUser(id: number): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<InsertUser>): Promise<User>;
+  
+  // User progress methods
+  getUserProgress(userId: number): Promise<UserProgress[]>;
+  getRealmProgress(userId: number, realmId: string): Promise<UserProgress | undefined>;
+  updateUserProgress(userId: number, realmId: string, progress: Partial<InsertUserProgress>): Promise<UserProgress>;
+  
+  // Reflection methods
+  getUserReflections(userId: number): Promise<Reflection[]>;
+  getRealmReflections(userId: number, realmId: string): Promise<Reflection[]>;
+  createReflection(reflection: InsertReflection): Promise<Reflection>;
 }
 
-export const storage = db ? new DatabaseStorage() : new MemoryStorage();
+export const storage = new DatabaseStorage();
