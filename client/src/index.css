@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(330, 81%, 60%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+  
+  /* Custom colors for Inner Flame */
+  --space: hsl(240, 25%, 4%);
+  --deep-purple: hsl(240, 29%, 14%);
+  --navy-blue: hsl(225, 42%, 16%);
+  --soft-pink: hsl(330, 81%, 70%);
+  --cyan-glow: hsl(175, 60%, 58%);
+  --mint-green: hsl(150, 50%, 75%);
+  --pink-glow: hsl(330, 81%, 80%);
+  --cyan-glow-light: hsl(175, 60%, 85%);
+  --purple-glow: hsl(310, 30%, 70%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(330, 81%, 60%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased text-foreground overflow-x-hidden;
+    background: var(--space);
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  .gradient-text {
+    background: linear-gradient(135deg, var(--soft-pink), var(--cyan-glow), var(--mint-green));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 3s ease infinite;
+  }
+  
+  .glow-button {
+    background: linear-gradient(135deg, rgba(255, 107, 157, 0.2), rgba(78, 205, 196, 0.2));
+    border: 1px solid rgba(255, 107, 157, 0.4);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    color: white;
+  }
+  
+  .glow-button:hover {
+    background: linear-gradient(135deg, rgba(255, 107, 157, 0.4), rgba(78, 205, 196, 0.4));
+    border-color: rgba(255, 107, 157, 0.8);
+    box-shadow: 0 0 30px rgba(255, 107, 157, 0.6);
+    transform: translateY(-2px);
+  }
+  
+  .realm-card {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.8), rgba(22, 33, 62, 0.8));
+    border: 1px solid rgba(255, 107, 157, 0.3);
+    backdrop-filter: blur(15px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .realm-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    border-color: rgba(78, 205, 196, 0.8);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 60px rgba(78, 205, 196, 0.4);
+  }
+  
+  .particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, rgba(255, 107, 157, 0.8), transparent);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  
+  .progress-glow {
+    background: linear-gradient(90deg, var(--soft-pink), var(--cyan-glow), var(--mint-green));
+    background-size: 200% 100%;
+    animation: gradient-shift 2s ease infinite;
+  }
+  
+  .glass-morphism {
+    background: rgba(26, 26, 46, 0.3);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  
+  .animate-particle {
+    animation: particle 20s linear infinite;
+  }
+  
+  .animate-fadeIn {
+    animation: fadeIn 1s ease-out forwards;
+  }
+  
+  .animate-slideUp {
+    animation: slideUp 0.8s ease-out forwards;
+  }
+  
+  .animate-pulse-soft {
+    animation: pulse-soft 3s ease-in-out infinite;
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 20px rgba(255, 107, 157, 0.5); }
+  100% { box-shadow: 0 0 40px rgba(255, 107, 157, 0.8), 0 0 60px rgba(255, 107, 157, 0.4); }
+}
+
+@keyframes particle {
+  0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  0% { opacity: 0; transform: translateY(50px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
