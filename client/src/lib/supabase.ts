@@ -17,7 +17,7 @@ class MockAuthService {
 
   async signUp(email: string, password: string, username: string): Promise<AuthResponse> {
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch('https://inner-flame-3.onrender.com/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ class MockAuthService {
 
   async signIn(email: string, password: string): Promise<AuthResponse> {
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('https://inner-flame-3.onrender.com/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
