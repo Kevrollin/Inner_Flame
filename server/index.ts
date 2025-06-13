@@ -1,11 +1,18 @@
 import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from "express";
+import cors from 'cors';
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 // Import your storage to ensure DB connection is established
 import { storage } from "./storage";
 
 const app = express();
+
+app.use(cors({
+  origin: 'https://inner-flame-4.onrender.com',
+  credentials: true, // only if you're using cookies or sessions
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
