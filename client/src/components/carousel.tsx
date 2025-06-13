@@ -50,10 +50,12 @@ export default function Carousel({
           className="absolute inset-0 flex items-center justify-center"
         >
           {/* Background Image */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${slides[currentSlide].bgImage})` }}
-          />
+          {currentSlide !== 0 && (
+            <div 
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${slides[currentSlide].bgImage})` }}
+            />
+          )}
           
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-purple-900/70 to-blue-900/80" />
