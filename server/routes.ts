@@ -6,7 +6,7 @@ import bcrypt from "bcrypt";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
-  app.post("/api/auth/register", async (req, res) => {
+  app.post("https://inner-flame-3.onrender.com/api/auth/register", async (req, res) => {
     const { username, email, password } = req.body;
     console.log("Register received:", req.body); // <-- Add this line
     if (!username || !email || !password) {
@@ -40,7 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("https://inner-flame-3.onrender.com/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
       
@@ -61,7 +61,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User progress routes
-  app.get("/api/progress/:userId", async (req, res) => {
+  app.get("https://inner-flame-3.onrender.com/api/progress/:userId", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
       const progress = await storage.getUserProgress(userId);
@@ -71,7 +71,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/progress/:userId/:realmId", async (req, res) => {
+  app.put("https://inner-flame-3.onrender.com/api/progress/:userId/:realmId", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
       const realmId = req.params.realmId;
@@ -85,7 +85,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Reflection routes
-  app.get("/api/reflections/:userId", async (req, res) => {
+  app.get("https://inner-flame-3.onrender.com/api/reflections/:userId", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
       const reflections = await storage.getUserReflections(userId);
@@ -95,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/reflections", async (req, res) => {
+  app.post("https://inner-flame-3.onrender.com/api/reflections", async (req, res) => {
     try {
       const reflectionData = insertReflectionSchema.parse(req.body);
       const reflection = await storage.createReflection(reflectionData);
