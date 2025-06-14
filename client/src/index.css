@@ -27,12 +27,13 @@
   /* Custom colors for Inner Flame */
   --space: hsl(240, 25%, 4%);
   --deep-purple: hsl(240, 29%, 14%);
+  --deep-yellow: hsl(41, 98%, 47%);
   --navy-blue: hsl(225, 42%, 16%);
   --soft-pink: hsl(330, 81%, 70%);
   --cyan-glow: hsl(175, 60%, 58%);
   --mint-green: hsl(150, 50%, 75%);
   --pink-glow: hsl(330, 81%, 80%);
-  --cyan-glow-light: hsl(175, 60%, 85%);
+  --cyan-glow-light: hsl(180, 43%, 4%);
   --purple-glow: hsl(310, 30%, 70%);
 }
 

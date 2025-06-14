@@ -39,7 +39,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 group">
             <Logo size="sm" className="group-hover:scale-110 transition-transform" />
-            <h1 className="text-xl font-bold gradient-text">Inner Flame</h1>
+            <h1 className="text-xl font-bold gradient-text">Inner<span className="text-xl font-bold text-pink-400">Flame</span></h1>
           </Link>
           
           <div className="hidden md:flex items-center space-x-6">
